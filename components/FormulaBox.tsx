@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import FormulaText from "@/components/FormulaText";
 
 interface FormulaBoxProps {
   formula: string;
@@ -23,8 +24,11 @@ export default function FormulaBox({
   const shownExample = activeExample === 2 && example2 ? example2 : example;
 
   return (
-    <div className="mb-5 rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900">
-      <p className="italic">{formula}</p>
+    <div className="mb-5 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+      <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">Fórmula</p>
+      <p className="italic leading-8">
+        <FormulaText formula={formula} />
+      </p>
       {example && (
         <div className="mt-1.5">
           <button

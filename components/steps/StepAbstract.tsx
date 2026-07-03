@@ -23,17 +23,12 @@ export default function StepAbstract({ data, onChange, centralSentence }: StepPr
   return (
     <StepCard id={meta.id} title={meta.title} objective={meta.objective}>
       <FormulaBox
-        formula="Contexto + lacuna + estratégia + resultado + significado"
+        formula="[Contexto] + [Lacuna] + [Estratégia] + [Resultado] + [Significado]"
         example="Infecções hospitalares associadas a têxteis contaminados são um risco crescente. Métodos de síntese de nanopartículas antibacterianas usam reagentes tóxicos. Sintetizamos AgNPs com extrato de chá verde e revestimos tecido de algodão. As AgNPs inibiram 99% do crescimento bacteriano em 24h. Este método oferece uma rota sustentável para têxteis hospitalares antimicrobianos."
         example2="Catalisadores para oxidação de CO em baixa temperatura são essenciais para o controle de emissões veiculares. Catalisadores convencionais à base de platina perdem atividade abaixo de 200°C. Sintetizamos nanopartículas de paládio suportadas em TiO2 mesoporoso via impregnação úmida. O catalisador atingiu conversão de CO superior a 95% a 150°C, mantendo estabilidade por 100 horas. Este resultado oferece uma alternativa mais barata e eficiente aos catalisadores convencionais de platina."
         exampleLabel="Nanomateriais (têxtil)"
         example2Label="Catálise (CO)"
       />
-
-      <p className="mb-4 text-xs text-muted">
-        <strong className="text-ink">Lembrete:</strong> o abstract precisa estar em inglês na versão final — pode
-        escrever em português aqui e traduzir depois.
-      </p>
 
       <FormField
         label="Contexto"

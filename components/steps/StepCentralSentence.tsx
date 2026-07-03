@@ -30,12 +30,6 @@ export default function StepCentralSentence({ data, onChange }: StepProps) {
         example2Label="Catálise (CO)"
       />
 
-      <p className="mb-4 text-xs text-muted">
-        <strong className="text-ink">Idioma:</strong> pode escrever em português daqui pra frente, se ajudar a
-        organizar as ideias. Os títulos de seção do Markdown final seguem o padrão ACS em inglês, mas o texto que
-        você escrever também vai precisar estar em inglês antes da submissão.
-      </p>
-
       <FormField
         label="Qual sistema você está estudando (ou pretende estudar)?"
         type="textarea"

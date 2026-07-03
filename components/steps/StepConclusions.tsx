@@ -18,7 +18,7 @@ export default function StepConclusions({ data, onChange }: StepProps) {
 
   return (
     <StepCard id={meta.id} title={meta.title} objective={meta.objective}>
-      <FormulaBox formula="Resposta + evidência + significado + limite + próximo passo. A conclusão faz o movimento inverso da introdução: começa na resposta específica e termina no significado mais amplo." />
+      <FormulaBox formula="[Resposta] + [Evidência] + [Significado] + [Limite] + [Próximo passo]. A conclusão faz o movimento inverso da introdução: começa na resposta específica e termina no significado mais amplo." />
 
       <FormulaSubBlock
         heading="Parágrafo 1, resposta do paper"

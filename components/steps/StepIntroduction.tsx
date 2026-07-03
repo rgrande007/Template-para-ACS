@@ -23,7 +23,7 @@ export default function StepIntroduction({ data, onChange, centralSentence }: St
 
   return (
     <StepCard id={meta.id} title={meta.title} objective={meta.objective}>
-      <FormulaBox formula="Área ampla + estado da arte + lacuna + objetivo. A introdução deve afunilar: começa no campo amplo e termina na contribuição específica do trabalho." />
+      <FormulaBox formula="[Área ampla] + [Estado da arte] + [Lacuna] + [Objetivo]. A introdução deve afunilar: começa no campo amplo e termina na contribuição específica do trabalho." />
 
       <FormulaSubBlock
         heading="Parágrafo 1, contexto"

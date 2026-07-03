@@ -47,7 +47,7 @@ export default function StepResults({ data, onChange }: StepProps) {
   return (
     <StepCard id={meta.id} title={meta.title} objective={meta.objective}>
       <FormulaBox
-        formula="Pergunta da figura + observação (com a evidência que a sustenta) + interpretação + ponte. A seção é organizada por figuras principais."
+        formula="[Pergunta da figura] + [Observação, com a evidência que a sustenta] + [Interpretação] + [Ponte]. A seção é organizada por figuras principais."
         example="Atomic sentence: A Figura 1 mostra que o revestimento com nanopartículas de prata reduz em mais de 99% a viabilidade de S. aureus e E. coli após 24h. Observação: halos de inibição maiores no tecido tratado, em comparação com o controle de tecido não tratado e com tecido tratado apenas com extrato de chá. Interpretação: a atividade antibacteriana vem das nanopartículas, não do extrato isoladamente. Ponte: isso levanta a questão de quão estável é esse efeito após lavagens, respondida na Figura 2."
         example2="Atomic sentence: A Figura 1 mostra que o catalisador de Pd/TiO2 atinge conversão de CO superior a 95% já a 150°C, temperatura muito abaixo do catalisador comercial de referência. Observação: curva de conversão de CO em função da temperatura, comparando Pd/TiO2 com o TiO2 puro (sem atividade) e com o catalisador comercial de Pt/Al2O3 (T50 mais alta). Interpretação: a alta dispersão das nanopartículas de Pd no suporte mesoporoso aumenta a densidade de sítios ativos disponíveis para adsorção de CO. Ponte: isso levanta a questão sobre a estabilidade desse desempenho ao longo do tempo, respondida na Figura 2."
         exampleLabel="Nanomateriais (têxtil)"

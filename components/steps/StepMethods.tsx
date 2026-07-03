@@ -18,7 +18,7 @@ export default function StepMethods({ data, onChange }: StepProps) {
   return (
     <StepCard id={meta.id} title={meta.title} objective={meta.objective}>
       <FormulaBox
-        formula="Materiais + preparo + caracterização (com a análise dos dados) + controles"
+        formula="[Materiais] + [Preparo] + [Caracterização, incluindo a análise dos dados] + [Controles]"
         example="Materiais: nitrato de prata, extrato de folhas de chá verde, tecido de algodão. Preparo: redução do nitrato de prata pelo extrato a 80°C por 30 min, seguida de impregnação do tecido por imersão. Caracterização: UV-Vis, DRX e MEV; halo de inibição e contagem de UFC em triplicata, com ANOVA e pós-teste de Tukey. Controles: tecido não tratado e tecido tratado apenas com extrato."
         example2="Materiais: cloreto de paládio, TiO2 mesoporoso comercial, agente redutor. Preparo: impregnação úmida do suporte com solução precursora de Pd, seguida de calcinação a 400°C. Caracterização: DRX, MEV-EDS e quimissorção de CO; conversão de CO medida por cromatografia gasosa em função da temperatura, testes de estabilidade em triplicata. Controles: TiO2 puro sem Pd e catalisador comercial de Pt/Al2O3."
         exampleLabel="Nanomateriais (têxtil)"
