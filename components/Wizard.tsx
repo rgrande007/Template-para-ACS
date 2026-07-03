@@ -2,11 +2,25 @@
 
 import { useEffect, useRef, useState } from "react";
 import { NotionSaveStatus, PaperFormData } from "@/types/paper";
-import { STEP_META, STORAGE_KEY, createDefaultFormData } from "@/lib/formSchema";
+import { STEP_META, createDefaultFormData } from "@/lib/formSchema";
 import { generateMarkdown } from "@/lib/generateMarkdown";
 import { computeCompletion, computeSectionCompletion } from "@/lib/progress";
+import {
+  DraftMeta,
+  clearDraftNotionPageId,
+  createDraft,
+  deleteDraft,
+  getDraftNotionPageId,
+  initializeDrafts,
+  listDrafts,
+  renameDraft,
+  saveDraftData,
+  setDraftNotionPageId,
+  switchActiveDraft,
+} from "@/lib/drafts";
 import SectionNav from "@/components/SectionNav";
 import CompletionBadge from "@/components/CompletionBadge";
+import DraftSwitcher from "@/components/DraftSwitcher";
 import LivePreview from "@/components/LivePreview";
 import MarkdownPreview from "@/components/MarkdownPreview";
 import ResizeHandle from "@/components/ResizeHandle";
@@ -30,11 +44,12 @@ const PREVIEW_WIDTH_KEY = "acs-paper-builder-preview-width";
 const MIN_PREVIEW_WIDTH = 280;
 const MAX_PREVIEW_WIDTH = 640;
 const DEFAULT_PREVIEW_WIDTH = 416;
-const NOTION_PAGE_ID_KEY = "acs-paper-builder-notion-page-id";
 const SUBMISSION_TOKEN_KEY = "acs-paper-builder-submission-token";
 
 export default function Wizard() {
   const [formData, setFormData] = useState<PaperFormData>(createDefaultFormData());
+  const [drafts, setDrafts] = useState<DraftMeta[]>([]);
+  const [activeDraftId, setActiveDraftId] = useState("");
   const [loaded, setLoaded] = useState(false);
   const [activeSection, setActiveSection] = useState(NAV_SECTIONS[0].id);
   const [mobilePreviewOpen, setMobilePreviewOpen] = useState(false);
@@ -49,11 +64,11 @@ export default function Wizard() {
 
   useEffect(() => {
     try {
-      const savedData = localStorage.getItem(STORAGE_KEY);
-      if (savedData) {
-        const parsed = JSON.parse(savedData);
-        setFormData({ ...createDefaultFormData(), ...parsed });
-      }
+      const { activeId, data, drafts: loadedDrafts } = initializeDrafts();
+      setActiveDraftId(activeId);
+      setFormData(data);
+      setDrafts(loadedDrafts);
+
       const savedWidth = Number(localStorage.getItem(PREVIEW_WIDTH_KEY));
       if (Number.isFinite(savedWidth) && savedWidth >= MIN_PREVIEW_WIDTH && savedWidth <= MAX_PREVIEW_WIDTH) {
         setPreviewWidth(savedWidth);
@@ -150,36 +165,69 @@ export default function Wizard() {
   };
 
   useEffect(() => {
-    if (!loaded) return;
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
-    } catch {
-      // localStorage indisponível ou cota excedida: progresso não será persistido
-    }
-  }, [formData, loaded]);
+    if (!loaded || !activeDraftId) return;
+    saveDraftData(activeDraftId, formData);
+    setDrafts(listDrafts());
+  }, [formData, loaded, activeDraftId]);
 
   const handleClear = () => {
     const confirmed = window.confirm(
-      "Tem certeza que deseja limpar todo o formulário? Essa ação não pode ser desfeita."
+      "Tem certeza que deseja limpar este rascunho? Essa ação não pode ser desfeita."
     );
     if (!confirmed) return;
     const defaults = createDefaultFormData();
     setFormData(defaults);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(defaults));
-      localStorage.removeItem(NOTION_PAGE_ID_KEY);
-    } catch {
-      // localStorage indisponível: ignora
+    saveDraftData(activeDraftId, defaults);
+    clearDraftNotionPageId(activeDraftId);
+    setDrafts(listDrafts());
+  };
+
+  const handleSwitchDraft = (id: string) => {
+    if (id === activeDraftId) return;
+    const data = switchActiveDraft(id);
+    setActiveDraftId(id);
+    setFormData(data);
+  };
+
+  const handleCreateDraft = () => {
+    const name = window.prompt("Nome do novo rascunho:", `Rascunho ${drafts.length + 1}`);
+    if (!name) return;
+    const meta = createDraft(name);
+    setDrafts(listDrafts());
+    handleSwitchDraft(meta.id);
+  };
+
+  const handleRenameDraft = (id: string) => {
+    const current = drafts.find((d) => d.id === id);
+    const name = window.prompt("Novo nome do rascunho:", current?.name ?? "");
+    if (!name) return;
+    renameDraft(id, name);
+    setDrafts(listDrafts());
+  };
+
+  const handleDeleteDraft = (id: string) => {
+    const target = drafts.find((d) => d.id === id);
+    const confirmed = window.confirm(
+      `Excluir o rascunho "${target?.name ?? ""}"? Essa ação não pode ser desfeita.`
+    );
+    if (!confirmed) return;
+    deleteDraft(id);
+    const remaining = listDrafts();
+    setDrafts(remaining);
+    if (id === activeDraftId && remaining.length > 0) {
+      handleSwitchDraft(remaining[0].id);
     }
   };
 
   const handleDownloadBackup = () => {
     const blob = new Blob([JSON.stringify(formData, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-    const studentSlug = formData.initial.studentName.trim().replace(/\s+/g, "-").toLowerCase() || "rascunho";
+    const draftName = drafts.find((d) => d.id === activeDraftId)?.name;
+    const slug =
+      (draftName || formData.initial.studentName).trim().replace(/\s+/g, "-").toLowerCase() || "rascunho";
     const a = document.createElement("a");
     a.href = url;
-    a.download = `acs-paper-builder-${studentSlug}.json`;
+    a.download = `acs-paper-builder-${slug}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -234,7 +282,7 @@ export default function Wizard() {
   };
 
   const postToNotion = async (token: string) => {
-    const notionPageId = localStorage.getItem(NOTION_PAGE_ID_KEY) ?? undefined;
+    const notionPageId = getDraftNotionPageId(activeDraftId);
     return fetch("/api/create-paper", {
       method: "POST",
       headers: {
@@ -269,7 +317,7 @@ export default function Wizard() {
         throw new Error(result.error || "Falha ao salvar no Notion.");
       }
       if (result.pageId) {
-        localStorage.setItem(NOTION_PAGE_ID_KEY, result.pageId);
+        setDraftNotionPageId(activeDraftId, result.pageId);
       }
       setSaveStatus("success");
     } catch (error) {
@@ -287,11 +335,18 @@ export default function Wizard() {
       <div className="sticky top-0 z-20">
         <header className="border-b border-stone-200 bg-paper/95 px-4 py-3 backdrop-blur sm:px-6">
           <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
-            <div>
+            <div className="flex items-center gap-3">
               <h1 className="font-serif text-lg font-bold text-ink sm:text-xl">ACS Paper Builder</h1>
-              <p className="hidden text-xs text-muted sm:block">
-                Planeje seu artigo científico no formato Article da ACS.
-              </p>
+              {activeDraftId && (
+                <DraftSwitcher
+                  drafts={drafts}
+                  activeDraftId={activeDraftId}
+                  onSwitch={handleSwitchDraft}
+                  onCreate={handleCreateDraft}
+                  onRename={handleRenameDraft}
+                  onDelete={handleDeleteDraft}
+                />
+              )}
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <CompletionBadge percentage={completion} />
